@@ -1,0 +1,69 @@
+provider: virtualbox
+vm:
+  box_name: centos/7
+  vms:
+    template:
+      vm_name: sample1
+      hostname: 'sample1-host'
+      cpu: 1
+      memory: 512
+      synced_folders:
+        - host: '.'
+          guest: '/vagrant'
+          owner: root
+          group: root
+      networks:
+        nat_forwarded_ports:
+          - id: 'aaa'
+            guest: '80'
+            host: '8080'
+            protocol: TCP
+            auto_correct: true # ポートフォワードが重複したら自動的に変更するか
+        privates:
+          - dhcp: true
+            auto_config: true # NIC の自動設定
+          - dhcp: false
+            ip_addr: '192.169.250.2' # DHCP の場合、192.168.10.0 とすると192.168.10.1 - 192.168.10.254 で割り当ててくれる
+            netmask: '255.255.255.0'
+            auto_config: true # NIC の自動設定
+            intnet: 'aaa'
+      provider:
+        virtualbox:
+          box_check_update: true
+          gui: false
+          modifyvm:
+            ostype: 'RedHat_64' # RedHat_64 など
+            natdnsproxy1: 'off' # DNS Proxy として機能させるか
+            natdnshostresolver1: 'off' # ホストのリゾルバ設定を利用するか
+    template2:
+      box_name: centos/7
+      vm_name: sample2
+      cpu: 1
+      memory: 1024
+      hostname: 'sample2-host'
+      box_check_update: true
+      networks:
+        nat_forwarded_port:
+          - id: 'bbb'
+            guest: '443'
+            host: '8443'
+            protocol: TCP
+            auto_correct: true # ポートフォワードが重複したら自動的に変更するか
+        privates:
+          - dhcp: false
+            ip_addr: '192.169.250.3' # DHCP の場合、192.168.10.0 とすると192.168.10.1 - 192.168.10.254 で割り当ててくれる
+            netmask: '255.255.255.0'
+            auto_config: true # NIC の自動設定
+            intnet: 'aaa'
+      provider:
+        virtualbox:
+          box_check_update: true
+          gui: false
+
+# vSphere は面倒
+
+# aws
+# aws.user_data = "#!/bin/sh\nsed -i 's/^.*requiretty/#Defaults requiretty/' /etc/sudoers\n" を入れないと sudo できずに vagrant up が失敗する
+# box はダミーを使用する
+#
+# access_key などは、.env ファイルに記載し、dotenv プラグインを使用して、Dotenv.load で環境変数として読み込むようにした方がよい

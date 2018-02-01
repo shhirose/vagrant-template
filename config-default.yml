@@ -1,0 +1,122 @@
+---
+provider: virtualbox
+vm:
+  box_name: centos/7 # This configures what box the machine will be brought up against.
+  box_download_checksum: ''  # The checksum of the box specified by config.vm.box_url.
+  box_download_client_cert: '' # Path to a client certificate to use when downloading the box, if it is necessary.
+  box_download_ca_cert: '' # Path to a CA cert bundle to use when downloading a box directly.
+  box_download_ca_path: '' # Path to a directory containing CA certificates for downloading a box directly.
+  box_download_insecure: false # If true, then SSL certificates from the server will not be verified.
+  box_download_location_trusted: false # If true, then all HTTP redirects will be treated as trusted.
+  box_url: '' # The URL that the configured box can be found at.
+  box_version: '' # The version of the box to use.
+  communicator: 'ssh' # The communicator type to use to connect to the guest box.
+  graceful_halt_timeout: 60 # The time in seconds that Vagrant will wait for the machine to gracefully halt when vagrant halt is called.
+  guest: :linux # The guest OS that will be running within this machine.
+  post_up_message: '' # A message to show after vagrant up.
+  usable_port_range: '2200..2250' # A range of ports Vagrant can use for handling port collisions and such.
+  ssh:
+    username: 'vagrant' # This sets the username that Vagrant will SSH as by default.
+    password: '' # This sets a password that Vagrant will use to authenticate the SSH user.
+    host: 'localhost' # The hostname or IP to SSH into. By default this is empty, because the provider usually figures this out for you.
+    port: 22 # The port to SSH into.
+    guest_port: 22 # The port on the guest that SSH is running on.
+    private_key_path: '' # The path to the private key to use to SSH into the guest machine.
+    keys_only: true # Only use Vagrant-provided SSH private keys (do not use any keys stored in ssh-agent).
+    paranoid: false # Perform strict host-key verification.
+    forward_agent: false # SSH-Agent を使用したホストとゲストの鍵共有
+    forward_x11: false # If true, X11 forwarding over SSH connections is enabled.
+    forward_env: [] # An array of host environment variables to forward to the guest.
+    insert_key: true # 仮想マシン単位での秘密鍵の共有化
+    proxy_command: '' # A command-line command to execute that receives the data to send to SSH on stdin.
+    pty: false　# プロビジョニングを擬似端末で行う
+    keep_alive: false # If true, this setting SSH will send keep-alive packets every 5 seconds by default to keep connections alive.
+    shell: '' #  The shell to use when executing SSH commands from Vagrant. By default this is bash -l.
+    export_command_template: 'export %ENV_KEY%="%ENV_VALUE%"' # The template used to generate exported environment variables in the active session.
+    sudo_command: 'sudo -E -H %c' # The command to use when executing a command with sudo.
+    compression: true # If false, this setting will not include the compression setting when ssh'ing into a machine.
+    dsa_authentication: true #  If false, this setting will not include DSAAuthentication when ssh'ing into a machine.
+    extra_args: [] # This settings value is passed directly into the ssh executable.
+  vms:
+    template:
+      box_name: centos/7
+      box_url: ''
+      vm_name: sample1
+      cpu: 1
+      memory: 512
+      hostname: ''
+      synced_folders:
+        - host: '.'
+          guest: '/vagrant'
+          owner: root
+          group: root
+      networks:
+        nat_forwarded_ports:
+          - id: 'aaa'
+            guest: '80'
+            guest_src_ip: nil
+            host: '8080'
+            host_src_ip: nil
+            protocol: TCP
+            auto_correct: true # ポートフォワードが重複したら自動的に変更するか
+        privates:
+          - dhcp: true
+            dhcp_lower: ''
+            dhcp_upper: ''
+            ip_addr: '' # DHCP の場合、192.168.10.0 とすると192.168.10.1 - 192.168.10.254 で割り当ててくれる
+            netmask: ''
+            auto_config: true # NIC の自動設定
+            intnet: '' # 内部ネットワークを使用する場合のネットワーク名
+            nic_type: '' # NIC Type (virtio など)
+        publics:
+          - dhcp: true
+            dhcp_assigned_default_route: false # デフォルトルートにするかどうか
+            dhcp_lower: ''
+            dhcp_upper: ''
+            ip_addr: '' # DHCP の場合、192.168.10.0 とすると192.168.10.1 - 192.168.10.254 で割り当ててくれる
+            netmask: ''
+            bridge: '' # ブリッジ名 (VBoxManage list bridgedifs | grep '^Name:' の結果)
+            auto_config: true # NIC の自動設定
+      provider:
+        virtualbox:
+          box_check_update: true
+          gui: false
+          modifyvm:
+            ostype: '' # RedHat_64 など
+            natdnsproxy1: 'off' # DNS Proxy として機能させるか
+            natdnshostresolver1: 'off' # ホストのリゾルバ設定を利用するか
+        aws:
+          access_key_id: '' # IAM access key
+          secret_access_key: '' # IAM secret access key
+          keypair_name: '' # IAM keypair name
+          region: ''
+          availability_zone: ''
+          ami: '' # AMI ID
+          instance_type: ''
+          security_group: [] # security group names
+          tags: [] # key-value arrays
+          associate_public_ip: true
+          elastic_ip: false # Elastic IP の自動付与
+          # EBS
+          block_device_mapping:
+            - DeviceName: '' # EBS を接続した際のデバイス名 (/dev/sda1 など)
+              VirtualName: '' # EBS の名称
+              VolumeSize: 8 # EBS のサイズ (GB)
+              VolumeType: '' # standard, io1, etc..
+              Iops: nil # VolumeType が io1 の場合のIOPS値
+              DeleteOnTermination: false # インスタンスを削除した際にEBSも削除するか
+          # VPC
+          vpc:
+            subnet_id: '' # VPC のサブネットID
+            private_ip_address: '' # VPC でのローカルIPアドレス
+          ssh:
+            username: '' # SSH するユーザー名 (CentOS などは ec2-user, Ubuntu は ubuntu)
+            private_key_path: '' # SSH するユーザーの秘密鍵のパス
+
+# vSphere は面倒
+
+# aws
+# aws.user_data = "#!/bin/sh\nsed -i 's/^.*requiretty/#Defaults requiretty/' /etc/sudoers\n" を入れないと sudo できずに vagrant up が失敗する
+# box はダミーを使用する
+#
+# access_key などは、.env ファイルに記載し、dotenv プラグインを使用して、Dotenv.load で環境変数として読み込むようにした方がよい
