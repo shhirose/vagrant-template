@@ -112,6 +112,21 @@ vm:
           ssh:
             username: '' # SSH するユーザー名 (CentOS などは ec2-user, Ubuntu は ubuntu)
             private_key_path: '' # SSH するユーザーの秘密鍵のパス
+      shell:
+        - inline: ''
+          args: []
+          env: []
+          binary: true
+          privileged: true
+          upload_path: '' # Linux is "/tmp/vagrant-shell". Windows is "C:\tmp\vagrant-shell"
+          keep_color: false
+          name: ''
+          powershell_args: ''
+          powershell_elevated_interactive: false
+        - path: ''
+          md5: ''
+          sha1: ''
+          sensitive: false
 
 # vSphere は面倒
 
